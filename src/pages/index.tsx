@@ -1,12 +1,14 @@
+import { useContext } from "react";
 import { GetStaticProps } from "next";
+import { useRouter } from 'next/router';
 import Image from 'next/image'
 import Link from 'next/link';
-import {api} from '../services/api'
 import {format, parseISO} from 'date-fns'
 import ptBR from 'date-fns/locale/pt-BR'
-import { convertDurationToTimeString } from "../utils/convertDurationToTimeString";
-import { useRouter } from 'next/router';
 
+import { PlayerContext } from "../contexts/PlayerContext";
+import {api} from '../services/api'
+import { convertDurationToTimeString } from "../utils/convertDurationToTimeString";
 
 import styles from './home.module.scss'
 
@@ -19,7 +21,7 @@ type Episode = {
     durationAsString: string;
     url: string;
     publishedAt: string, 
-    duration: Number
+    duration: number
 }
 type HomeProps = {
 latestEpisodes: Episode[],
@@ -28,11 +30,13 @@ allEpisodes: Episode[];
 
 export default function Home({latestEpisodes, allEpisodes}: HomeProps ){
 
+  const { play } = useContext( PlayerContext)
+
 return (
   
   <div className = {styles.homepage}>
     <section className = {styles.latestEpisodes}>
-      <h2>Últimos Lançamentos</h2>
+      <h2>Últimos Lançamentos </h2>
       
       <ul>
         {latestEpisodes.map( episode => {
@@ -53,7 +57,7 @@ return (
                 <span>{episode.durationAsString}</span>
               </div>
 
-              <button type = "button" >
+              <button type = "button" onClick={()=> play(episode)}>
                 <img src = "/play-green.svg" alt = "Tocar episodio"/>
               </button>
             </li>
@@ -133,7 +137,7 @@ return {
   thumbnail: episode.thumbnail, 
   members: episode.members, 
   publishedAt: format(parseISO(episode.published_at), 'd MMM yy', {locale: ptBR}), 
-  duration: Number(episode.file.duration), 
+  duration: Number (episode.file.duration), 
   durationAsString: convertDurationToTimeString(Number(episode.file.duration)),  
   url: episode.file.url,
 };

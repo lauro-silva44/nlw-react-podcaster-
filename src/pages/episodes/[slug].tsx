@@ -1,10 +1,10 @@
 import { GetStaticPaths, GetStaticProps } from 'next';
 import { format, parseISO } from 'date-fns';
 import ptBR from 'date-fns/locale/pt-BR';
+import { useRouter } from 'next/router';
 import Image from 'next/image'
 import Link from 'next/link';
 
-import { useRouter } from 'next/router';
 import { api } from '../../services/api';
 import { convertDurationToTimeString } from '../../utils/convertDurationToTimeString';
 
@@ -20,7 +20,7 @@ type Episode = {
     durationAsString: string;
     url: string;
     publishedAt: string, 
-    duration: Number;
+    duration: number;
     description: string;
 }
 
@@ -29,6 +29,7 @@ type EpisodeProps = {
 }
 
 export default function Episode( { episode }: EpisodeProps) {
+
 
     return(
         <div className = { styles.episode }> 
@@ -67,12 +68,28 @@ export default function Episode( { episode }: EpisodeProps) {
 }
 
 export const getStaticPaths : GetStaticPaths = async () => {
+
+    const { data } = await api.get( 'episodes',  { 
+        params: {
+            _limit: 2, 
+            _sort: 'published_at',
+            _order: 'desc'
+        }
+    })
+
+    const paths = data.map( episode => {
+        return ({
+            params: {
+                slug: episode.id
+            }
+            }
+            )
+            
+    })
     
     return {
-        paths: [ 
-            {params : {slug: 'a-importancia-da-contribuicao-em-open-source'} }
-        ], 
-        fallback: 'blocking'
+        paths, 
+        fallback: true
     }
 }
 
